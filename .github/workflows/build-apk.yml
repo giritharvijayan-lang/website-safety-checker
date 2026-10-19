@@ -36,7 +36,7 @@ jobs:
         working-directory: ./mobile
         run: |
           rm -rf android
-          flutter create --platforms=android --org com.example .
+          flutter create --platforms=android --project-name website_safety_checker --org com.example .
 
       - name: Inject Custom Intent Filters & Permissions
         run: |
