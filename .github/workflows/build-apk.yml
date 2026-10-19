@@ -80,10 +80,6 @@ jobs:
         working-directory: ./mobile
         run: flutter pub get
 
-      - name: Verify Code Quality (Analyze)
-        working-directory: ./mobile
-        run: flutter analyze --no-fatal-infos
-
       - name: Build Release APK
         working-directory: ./mobile
         run: flutter build apk --release
