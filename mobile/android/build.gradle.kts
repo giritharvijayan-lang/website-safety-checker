@@ -17,6 +17,22 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(":app")
+    afterEvaluate {
+        if (project.hasProperty("android")) {
+            val androidExt = project.extensions.findByName("android")
+            if (androidExt != null) {
+                try {
+                    val getNs = androidExt.javaClass.getMethod("getNamespace")
+                    val currentNs = getNs.invoke(androidExt)
+                    if (currentNs == null) {
+                        val setNs = androidExt.javaClass.getMethod("setNamespace", String::class.java)
+                        val pkg = if (project.group.toString().isNotEmpty()) project.group.toString() else "com.safetychecker.${project.name.replace("-", "_")}"
+                        setNs.invoke(androidExt, pkg)
+                    }
+                } catch (_: Exception) {}
+            }
+        }
+    }
 }
 
 tasks.register<Delete>("clean") {

@@ -27,7 +27,7 @@ class _WebsiteSafetyCheckerAppState
     extends ConsumerState<WebsiteSafetyCheckerApp> {
   late final AppLinks _appLinks;
   StreamSubscription<Uri>? _appLinksSubscription;
-  StreamSubscription<String>? _intentDataStreamSubscription;
+  StreamSubscription<List<SharedMediaFile>>? _intentDataStreamSubscription;
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
   String? _lastProcessedUrl;
@@ -64,18 +64,24 @@ class _WebsiteSafetyCheckerAppState
     );
 
     // 2. ReceiveSharingIntent for OS Share Sheet (sharing text from apps)
-    _intentDataStreamSubscription =
-        ReceiveSharingIntent.getTextStream().listen((String text) {
-      if (text.isNotEmpty) {
-        _handleIncomingUrl(text);
+    _intentDataStreamSubscription = ReceiveSharingIntent.instance
+        .getMediaStream()
+        .listen((List<SharedMediaFile> value) {
+      final sharedText = value.map((f) => f.path).join(" ");
+      if (sharedText.isNotEmpty) {
+        _handleIncomingUrl(sharedText);
       }
     }, onError: (err) {
       debugPrint("ReceiveSharingIntent error: $err");
     });
 
-    ReceiveSharingIntent.getInitialText().then((String? text) {
-      if (text != null && text.isNotEmpty) {
-        _handleIncomingUrl(text);
+    ReceiveSharingIntent.instance.getInitialMedia().then((List<SharedMediaFile> value) {
+      if (value.isNotEmpty) {
+        final sharedText = value.map((f) => f.path).join(" ");
+        if (sharedText.isNotEmpty) {
+          _handleIncomingUrl(sharedText);
+        }
+        ReceiveSharingIntent.instance.reset();
       }
     });
   }
