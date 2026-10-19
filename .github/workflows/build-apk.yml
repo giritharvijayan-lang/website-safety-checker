@@ -32,21 +32,46 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Backup Custom AndroidManifest
-        run: |
-          mkdir -p /tmp/manifest_backup
-          cp mobile/android/app/src/main/AndroidManifest.xml /tmp/manifest_backup/AndroidManifest.xml
-
-      - name: Generate Android Project Scaffolding
+      - name: Scaffolding Clean Android Project
         working-directory: ./mobile
         run: |
+          rm -rf android
           flutter create --platforms=android --org com.example .
 
-      - name: Restore Custom AndroidManifest
+      - name: Inject Custom Intent Filters & Permissions
         run: |
-          cp /tmp/manifest_backup/AndroidManifest.xml mobile/android/app/src/main/AndroidManifest.xml
+          python3 -c '
+          with open("mobile/android/app/src/main/AndroidManifest.xml", "r") as f:
+              c = f.read()
 
-      - name: Install Flutter Dependencies
+          if "android.permission.INTERNET" not in c:
+              c = c.replace("<application", "<uses-permission android:name=\"android.permission.INTERNET\" />\n    <application")
+
+          filters = """
+                      <!-- Link Interceptor / Default Browser Handler -->
+                      <intent-filter>
+                          <action android:name=\"android.intent.action.VIEW\" />
+                          <category android:name=\"android.intent.category.DEFAULT\" />
+                          <category android:name=\"android.intent.category.BROWSABLE\" />
+                          <data android:scheme=\"http\" />
+                          <data android:scheme=\"https\" />
+                      </intent-filter>
+
+                      <!-- Share Sheet Handler -->
+                      <intent-filter>
+                          <action android:name=\"android.intent.action.SEND\" />
+                          <category android:name=\"android.intent.category.DEFAULT\" />
+                          <data android:mimeType=\"text/plain\" />
+                      </intent-filter>
+                  </activity>"""
+
+          c = c.replace("</activity>", filters)
+
+          with open("mobile/android/app/src/main/AndroidManifest.xml", "w") as f:
+              f.write(c)
+          '
+
+      - name: Install Dependencies
         working-directory: ./mobile
         run: flutter pub get
 
