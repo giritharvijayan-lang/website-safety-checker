@@ -32,19 +32,49 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Backup Custom AndroidManifest
+      - name: Generate Clean Android Platform Scaffolding
         run: |
-          mkdir -p /tmp/manifest_backup
-          cp mobile/android/app/src/main/AndroidManifest.xml /tmp/manifest_backup/AndroidManifest.xml
+          flutter create --platforms=android --org com.example --project-name website_safety_checker /tmp/fresh_app
+          rm -rf mobile/android
+          cp -r /tmp/fresh_app/android mobile/android
 
-      - name: Generate Android Project Scaffolding
-        working-directory: ./mobile
+      - name: Configure Manifest Permissions & Link Interceptor
         run: |
-          flutter create --platforms=android --org com.example .
+          python3 -c '
+          path = "mobile/android/app/src/main/AndroidManifest.xml"
+          with open(path, "r", encoding="utf-8") as f:
+              c = f.read()
 
-      - name: Restore Custom AndroidManifest
-        run: |
-          cp /tmp/manifest_backup/AndroidManifest.xml mobile/android/app/src/main/AndroidManifest.xml
+          if "android.permission.INTERNET" not in c:
+              c = c.replace("<application", "<uses-permission android:name=\"android.permission.INTERNET\" />\n    <application")
+
+          c = c.replace("android:launchMode=\"singleTop\"", "android:launchMode=\"singleTask\"")
+          c = c.replace("android:label=\"website_safety_checker\"", "android:label=\"Safety Checker\"")
+
+          filters = """
+                      <!-- Link Interceptor / Default Browser Handler (clicks on http & https links) -->
+                      <intent-filter>
+                          <action android:name=\"android.intent.action.VIEW\" />
+                          <category android:name=\"android.intent.category.DEFAULT\" />
+                          <category android:name=\"android.intent.category.BROWSABLE\" />
+                          <data android:scheme=\"http\" />
+                          <data android:scheme=\"https\" />
+                      </intent-filter>
+
+                      <!-- OS Share Sheet Handler for receive_sharing_intent -->
+                      <intent-filter>
+                          <action android:name=\"android.intent.action.SEND\" />
+                          <category android:name=\"android.intent.category.DEFAULT\" />
+                          <data android:mimeType=\"text/plain\" />
+                      </intent-filter>
+                  </activity>"""
+
+          if "android.intent.action.VIEW" not in c:
+              c = c.replace("</activity>", filters)
+
+          with open(path, "w", encoding="utf-8") as f:
+              f.write(c)
+          '
 
       - name: Install Dependencies
         working-directory: ./mobile
