@@ -8,7 +8,7 @@ on:
       - '.github/workflows/build-apk.yml'
   pull_request:
     branches: [ "main", "master" ]
-  workflow_dispatch: # Allows 1-click manual trigger from GitHub Actions tab
+  workflow_dispatch:
 
 jobs:
   build:
@@ -24,7 +24,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'
 
       - name: Setup Flutter SDK
         uses: subosito/flutter-action@v2
@@ -33,10 +32,21 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Verify Flutter & Environment
-        run: flutter doctor -v
+      - name: Backup Custom AndroidManifest
+        run: |
+          mkdir -p /tmp/manifest_backup
+          cp mobile/android/app/src/main/AndroidManifest.xml /tmp/manifest_backup/AndroidManifest.xml
 
-      - name: Install Dependencies
+      - name: Generate Android Project Scaffolding
+        working-directory: ./mobile
+        run: |
+          flutter create --platforms=android --org com.example .
+
+      - name: Restore Custom AndroidManifest
+        run: |
+          cp /tmp/manifest_backup/AndroidManifest.xml mobile/android/app/src/main/AndroidManifest.xml
+
+      - name: Install Flutter Dependencies
         working-directory: ./mobile
         run: flutter pub get
 
@@ -44,7 +54,7 @@ jobs:
         working-directory: ./mobile
         run: flutter build apk --release
 
-      - name: Rename APK for Easy Download
+      - name: Prepare APK Output
         run: |
           mkdir -p build-output
           cp mobile/build/app/outputs/flutter-apk/app-release.apk build-output/WebsiteSafetyChecker-v1.0.apk
