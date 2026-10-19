@@ -32,44 +32,19 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Scaffolding Clean Android Project
+      - name: Backup Custom AndroidManifest
+        run: |
+          mkdir -p /tmp/manifest_backup
+          cp mobile/android/app/src/main/AndroidManifest.xml /tmp/manifest_backup/AndroidManifest.xml
+
+      - name: Generate Android Project Scaffolding
         working-directory: ./mobile
         run: |
-          rm -rf android
-          flutter create --platforms=android --project-name website_safety_checker --org com.example .
+          flutter create --platforms=android --org com.example .
 
-      - name: Inject Custom Intent Filters & Permissions
+      - name: Restore Custom AndroidManifest
         run: |
-          python3 -c '
-          with open("mobile/android/app/src/main/AndroidManifest.xml", "r") as f:
-              c = f.read()
-
-          if "android.permission.INTERNET" not in c:
-              c = c.replace("<application", "<uses-permission android:name=\"android.permission.INTERNET\" />\n    <application")
-
-          filters = """
-                      <!-- Link Interceptor / Default Browser Handler -->
-                      <intent-filter>
-                          <action android:name=\"android.intent.action.VIEW\" />
-                          <category android:name=\"android.intent.category.DEFAULT\" />
-                          <category android:name=\"android.intent.category.BROWSABLE\" />
-                          <data android:scheme=\"http\" />
-                          <data android:scheme=\"https\" />
-                      </intent-filter>
-
-                      <!-- Share Sheet Handler -->
-                      <intent-filter>
-                          <action android:name=\"android.intent.action.SEND\" />
-                          <category android:name=\"android.intent.category.DEFAULT\" />
-                          <data android:mimeType=\"text/plain\" />
-                      </intent-filter>
-                  </activity>"""
-
-          c = c.replace("</activity>", filters)
-
-          with open("mobile/android/app/src/main/AndroidManifest.xml", "w") as f:
-              f.write(c)
-          '
+          cp /tmp/manifest_backup/AndroidManifest.xml mobile/android/app/src/main/AndroidManifest.xml
 
       - name: Install Dependencies
         working-directory: ./mobile
@@ -81,7 +56,7 @@ jobs:
 
       - name: Build Release APK
         working-directory: ./mobile
-        run: flutter build apk --release --verbose
+        run: flutter build apk --release
 
       - name: Prepare APK Output
         run: |
