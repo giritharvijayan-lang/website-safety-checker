@@ -24,3 +24,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+# Force app_links to 6.3.x — version 6.4+ pulls in JNI which
+# requires NDK and causes CI builds to fail.
+dependency_overrides:
+  app_links: 6.3.2
