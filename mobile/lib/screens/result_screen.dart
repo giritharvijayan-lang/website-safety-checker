@@ -456,7 +456,7 @@ class ResultScreen extends StatelessWidget {
         break;
       case 'SAFE':
       default:
-        riskColor = Colors.emeraldAccent;
+        riskColor = const Color(0xFF10B981);
         break;
     }
 

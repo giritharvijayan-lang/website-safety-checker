@@ -180,17 +180,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: (testSuccess == true ? Colors.emerald : Colors.redAccent).withOpacity(0.12),
+                      color: (testSuccess == true ? const Color(0xFF10B981) : Colors.redAccent).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: (testSuccess == true ? Colors.emerald : Colors.redAccent).withOpacity(0.3),
+                        color: (testSuccess == true ? const Color(0xFF10B981) : Colors.redAccent).withOpacity(0.3),
                       ),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           testSuccess == true ? Icons.check_circle_outline : Icons.error_outline,
-                          color: testSuccess == true ? Colors.emeraldAccent : Colors.redAccent,
+                          color: testSuccess == true ? const Color(0xFF34D399) : Colors.redAccent,
                           size: 18,
                         ),
                         const SizedBox(width: 8),
@@ -198,7 +198,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           child: Text(
                             testResult!,
                             style: TextStyle(
-                              color: testSuccess == true ? Colors.emeraldAccent : Colors.redAccent,
+                              color: testSuccess == true ? const Color(0xFF34D399) : Colors.redAccent,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                             ),
@@ -408,13 +408,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Colors.emerald.withOpacity(0.15),
+                                color: const Color(0xFF10B981).withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.emerald.withOpacity(0.3)),
+                                border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
                               ),
                               child: const Text(
                                 ':8000 LIVE',
-                                style: TextStyle(color: Colors.emeraldAccent, fontSize: 10, fontWeight: FontWeight.bold),
+                                style: TextStyle(color: Color(0xFF34D399), fontSize: 10, fontWeight: FontWeight.bold),
                               ),
                             ),
                             const SizedBox(width: 4),
@@ -580,7 +580,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         final isSuspicious = item.overall.verdict == 'SUSPICIOUS';
                         final color = isDangerous
                             ? Colors.redAccent
-                            : (isSuspicious ? Colors.orangeAccent : Colors.emeraldAccent);
+                            : (isSuspicious ? Colors.orangeAccent : const Color(0xFF34D399));
 
                         return GlassContainer(
                           opacity: 0.06,
