@@ -65,7 +65,7 @@ class _WebsiteSafetyCheckerAppState
 
     // 2. ReceiveSharingIntent for OS Share Sheet (sharing text from apps)
     _intentDataStreamSubscription =
-        ReceiveSharingIntent.getTextStream().listen((String text) {
+        ReceiveSharingIntent.instance.getTextStream().listen((String text) {
       if (text.isNotEmpty) {
         _handleIncomingUrl(text);
       }
@@ -73,7 +73,7 @@ class _WebsiteSafetyCheckerAppState
       debugPrint("ReceiveSharingIntent error: $err");
     });
 
-    ReceiveSharingIntent.getInitialText().then((String? text) {
+    ReceiveSharingIntent.instance.getInitialText().then((String? text) {
       if (text != null && text.isNotEmpty) {
         _handleIncomingUrl(text);
       }
